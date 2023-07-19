@@ -11,7 +11,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="comment in comments" :key="comment.id">
+          <tr v-for="comment in comments" :key="comment.id" @click="toCommentPage(comment.id)">
             <td>{{ comment.id }}</td>
             <td>{{ comment.name }}</td>
             <td>{{ comment.email }}</td>
@@ -23,10 +23,10 @@
 
     <div v-if="comments" class="pagination-container">
       <div v-show="page > 1" class="pagination-number arrow" @click="tofirstPage">
-        <span class="arrow:text">&lt;&lt;</span>
+        <span class="arrow-text">&lt;&lt;</span>
       </div>
       <div v-show="page > 1" class="pagination-number arrow" @click="page = page - 1">
-        <span class="arrow:text">&lt;</span>
+        <span class="arrow-text">&lt;</span>
       </div>
 
       <div v-for="num in pagination.paginationArray" :key="num" class="pagination-number"
@@ -35,10 +35,10 @@
       </div>
 
       <div v-show="page < pagination.pagesAmount" class="pagination-number arrow" @click="page = page + 1">
-        <span class="arrow:text">&gt;</span>
+        <span class="arrow-text">&gt;</span>
       </div>
       <div v-show="page < pagination.pagesAmount" class="pagination-number arrow" @click="tolastPage">
-        <span class="arrow:text">&gt;&gt;</span>
+        <span class="arrow-text">&gt;&gt;</span>
       </div>
     </div>
 
@@ -104,6 +104,9 @@ export default {
     },
     tolastPage() {
       this.page = this.pagination.pagesAmount
+    },
+    toCommentPage(id) {
+      this.$router.push(`/comment/${id}`)
     }
   },
 }
@@ -176,7 +179,7 @@ export default {
 
 .arrow-text {
   display: block;
-  font-size: 13px;
+  font-size: 16px;
 }
 
 .pagination-number {
