@@ -19,6 +19,7 @@ export default {
     };
   },
   mounted() {
+    console.log(this.$router.history);
     this.getComment()
   },
   methods: {

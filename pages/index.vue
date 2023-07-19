@@ -5,7 +5,10 @@
       <table v-if="comments" class="styled-table">
         <thead>
           <tr>
-            <th>ID</th>
+            <th class="table__id" clickable @click="sortById">
+              ID
+              <span class="sort-arrow" :style="arrowStyle">&uarr;</span>
+            </th>
             <th>Name</th>
             <th>Email</th>
           </tr>
@@ -30,7 +33,7 @@
       </div>
 
       <div v-for="num in pagination.paginationArray" :key="num" class="pagination-number"
-        :class="{ 'pagination-active': page === num }" @click="page = num">
+        :class="{ 'pagination-active': page === num }" @click="setTablePage(num)">
         {{ num }}
       </div>
 
@@ -50,24 +53,46 @@ export default {
   data() {
     return {
       comments: null,
-      page: 40,
+      page: 1,
       pagination: {
         pagesAmount: null,
         perPage: 5,
         prevPage: null,
         nextPage: null,
         paginationArray: null
-      }
+      },
+      sortOrder: 'original'
     };
   },
-
+  computed: {
+    arrowStyle() {
+      if (this.sortOrder === 'asc') {
+        return { transform: 'rotate(0deg)' };
+      } else if (this.sortOrder === 'desc') {
+        return { transform: 'rotate(180deg)' };
+      } else {
+        return { display: 'none' };
+      }
+    }
+  },
   watch: {
     page() {
       this.getComments()
+      this.$router.push({ query: { page: this.page } });
+      this.sortOrder = 'original'
     }
   },
   mounted() {
     this.getComments()
+  },
+  created() {
+    const { page } = this.$route.query;
+    if (page) {
+      this.$router.push({ query: { page } });
+      this.page = parseInt(page);
+    } else {
+      this.$router.push({ query: { page: 1 } });
+    }
   },
   methods: {
     async getComments() {
@@ -107,6 +132,21 @@ export default {
     },
     toCommentPage(id) {
       this.$router.push(`/comment/${id}`)
+    },
+    setTablePage(num) {
+      this.page = num
+    },
+    sortById() {
+      if (this.sortOrder === 'asc') {
+        this.sortOrder = 'desc';
+        return this.comments.sort((a, b) => b.id - a.id);
+      } else if (this.sortOrder === 'desc') {
+        this.sortOrder = 'original';
+        return this.comments.sort((a, b) => a.id - b.id);
+      } else {
+        this.sortOrder = 'asc';
+        return this.comments;
+      }
     }
   },
 }
@@ -162,6 +202,15 @@ export default {
   color: #009879;
 }
 
+.table__id {
+  cursor: pointer;
+  display: flex;
+}
+
+.sort-arrow {
+  color: #fff;
+  display: block;
+}
 
 .hide {
   display: none;
