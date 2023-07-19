@@ -20,6 +20,28 @@
         </tbody>
       </table>
     </div>
+
+    <div v-if="comments" class="pagination-container">
+      <div v-show="page > 1" class="pagination-number arrow" @click="tofirstPage">
+        <span class="arrow:text">&lt;&lt;</span>
+      </div>
+      <div v-show="page > 1" class="pagination-number arrow" @click="page = page - 1">
+        <span class="arrow:text">&lt;</span>
+      </div>
+
+      <div v-for="num in pagination.paginationArray" :key="num" class="pagination-number"
+        :class="{ 'pagination-active': page === num }" @click="page = num">
+        {{ num }}
+      </div>
+
+      <div v-show="page < pagination.pagesAmount" class="pagination-number arrow" @click="page = page + 1">
+        <span class="arrow:text">&gt;</span>
+      </div>
+      <div v-show="page < pagination.pagesAmount" class="pagination-number arrow" @click="tolastPage">
+        <span class="arrow:text">&gt;&gt;</span>
+      </div>
+    </div>
+
   </div>
 </template>
 
@@ -28,22 +50,62 @@ export default {
   data() {
     return {
       comments: null,
-      page: 1,
+      page: 40,
       pagination: {
         pagesAmount: null,
-        perPage: 10
+        perPage: 5,
+        prevPage: null,
+        nextPage: null,
+        paginationArray: null
       }
     };
   },
-  async fetch() {
-    this.comments = await fetch(`https://jsonplaceholder.typicode.com/comments/?_page=${this.page}`)
-      .then(res => {
-        const headers = res.headers;
-        const totalCount = headers.get('x-total-count');
-        this.pagination.pagesAmount = Math.ceil(totalCount / this.pagination.perPage);
-        return res.json()
-      })
-  }
+
+  watch: {
+    page() {
+      this.getComments()
+    }
+  },
+  mounted() {
+    this.getComments()
+  },
+  methods: {
+    async getComments() {
+      this.comments = await fetch(`https://jsonplaceholder.typicode.com/comments/?_page=${this.page}`)
+        .then(res => {
+          const headers = res.headers;
+          const totalCount = headers.get('x-total-count');
+          this.pagination.pagesAmount = Math.ceil(totalCount / 10);
+          this.setUpPagination()
+          return res.json()
+        })
+    },
+    setUpPagination() {
+      this.prevPage = this.page - 1 > 0 ? this.page - 1 : null;
+      this.pagination.paginationArray = this.getPaginationRange(this.page, this.pagination.pagesAmount, this.pagination.perPage);
+    },
+    getPaginationRange(currentPage, totalPages, maxPagesToShow) {
+      const halfMaxPages = Math.floor(maxPagesToShow / 2);
+      let startPage = Math.max(currentPage - halfMaxPages, 1);
+      let endPage = Math.min(currentPage + halfMaxPages, totalPages);
+
+      if (endPage - startPage + 1 < maxPagesToShow) {
+        if (startPage === 1) {
+          endPage = Math.min(startPage + maxPagesToShow - 1, totalPages);
+        } else {
+          startPage = Math.max(endPage - maxPagesToShow + 1, 1);
+        }
+      }
+
+      return Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
+    },
+    tofirstPage() {
+      this.page = 1
+    },
+    tolastPage() {
+      this.page = this.pagination.pagesAmount
+    }
+  },
 }
 </script>
 
@@ -92,11 +154,54 @@ export default {
 
 .styled-table tbody tr:hover {
   background-color: #f3f3f3;
-
   cursor: pointer;
   font-weight: bold;
   color: #009879;
 }
+
+
+.hide {
+  display: none;
+  visibility: hidden;
+  height: 0;
+}
+
+.pagination-container {
+  margin-top: 20px;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.arrow-text {
+  display: block;
+  font-size: 13px;
+}
+
+.pagination-number {
+  margin: 0 6px;
+  border-radius: 6px;
+  background: #009879;
+  min-width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0 6px;
+}
+
+.pagination-number:hover {
+  background: #016955;
+}
+
+.pagination-active {
+  outline: 1px solid #fff;
+  outline-offset: -3px;
+  position: relative;
+}
+
 
 @media (max-width: 1024px) {
   .styled-table {
@@ -113,6 +218,13 @@ export default {
 
   .styled-table {
     font-size: 3.5vw;
+  }
+
+  .pagination-number {
+    min-width: 20px;
+    height: 25px;
+    padding: 0 5px;
+    font-size: 12px;
   }
 }
 </style>
