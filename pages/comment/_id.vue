@@ -2,6 +2,7 @@
   <div v-if="comment" class="container comment">
     <span class="comment__id"> ID: {{ comment.id }} </span>
     <span class="comment__id">Post ID: {{ comment.postId }}</span>
+    <nuxt-link to="/" class="comment__link">Back to commentators list</nuxt-link>
     <div class="comment__info">
       <h1 class="comment__name">{{ comment.name }}</h1>
       <span class="comment__email">{{ comment.email }}</span>
@@ -45,6 +46,7 @@ export default {
 }
 
 .comment__name {
+  margin-right: 20px;
   color: #009879;
 }
 
@@ -62,5 +64,38 @@ export default {
 .comment__text {
   color: #333;
   font-size: 22px;
+}
+
+.comment__link {
+  display: block;
+  margin-top: 20px;
+  color: #00bb96;
+}
+
+@media (max-width: 640px) {
+  .comment__link {
+    margin-top: 10px;
+    font-size: 3vw;
+  }
+
+  .comment__id {
+    font-size: 3vw;
+  }
+
+  .comment__name {
+    font-size: 4.5vw;
+  }
+
+  .comment__email {
+    font-size: 3.5vw;
+  }
+
+  .comment__info {
+    flex-wrap: wrap;
+  }
+
+  .comment__text {
+    font-size: 3.5vw;
+  }
 }
 </style>
